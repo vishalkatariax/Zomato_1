@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Zomato AI – Restaurant Recommendations</title>
+  <meta name="description" content="AI-powered restaurant recommendations for Bangalore. Find top South Indian, Chinese, Italian and more within your budget."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --red:      #E23744;
+      --red-dark: #C1121F;
+      --red-soft: #FFF0F1;
+      --red-mid:  #FDDDE0;
+      --bg:       #FAFAFA;
+      --white:    #FFFFFF;
+      --text:     #1C1C1C;
+      --muted:    #6B6B6B;
+      --border:   #E8E8E8;
+      --radius:   16px;
+      --shadow:   0 4px 24px rgba(0,0,0,0.08);
+      --shadow-lg:0 12px 48px rgba(0,0,0,0.12);
+    }
+
+    body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+    /* ── NAV ── */
+    nav {
+      background:var(--white);
+      border-bottom:1px solid var(--border);
+      padding:0 40px;
+      height:60px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      position:sticky; top:0; z-index:100;
+    }
+    .nav-logo { font-size:1.4rem; font-weight:800; color:var(--red); letter-spacing:-0.5px; }
+    .nav-links { display:flex; gap:28px; }
+    .nav-links a {
+      text-decoration:none; color:var(--muted); font-size:0.9rem; font-weight:500;
+      display:flex; align-items:center; gap:6px; transition:color .2s;
+    }
+    .nav-links a:hover { color:var(--text); }
+    .nav-right { display:flex; align-items:center; gap:12px; }
+    .nav-avatar {
+      width:36px; height:36px; border-radius:50%;
+      background:linear-gradient(135deg,var(--red),#FF6B6B);
+      display:flex; align-items:center; justify-content:center;
+      color:#fff; font-weight:700; font-size:0.85rem;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      max-width:720px; margin:0 auto;
+      padding:80px 24px 48px;
+      text-align:center;
+    }
+    .hero h1 {
+      font-size:clamp(2rem,5vw,3rem);
+      font-weight:800;
+      color:var(--text);
+      line-height:1.15;
+      margin-bottom:16px;
+    }
+    .hero p { font-size:1rem; color:var(--muted); max-width:480px; margin:0 auto 36px; line-height:1.6; }
+
+    /* ── SEARCH CARD ── */
+    .search-card {
+      background:var(--white);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:28px;
+      box-shadow:var(--shadow);
+      margin-bottom:20px;
+    }
+    .search-grid {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:14px;
+      margin-bottom:14px;
+    }
+    .field { display:flex; flex-direction:column; gap:6px; }
+    .field label { font-size:0.78rem; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; }
+    .field input, .field select {
+      border:1.5px solid var(--border);
+      border-radius:10px;
+      padding:11px 14px;
+      font-size:0.95rem;
+      font-family:inherit;
+      color:var(--text);
+      background:var(--white);
+      outline:none;
+      transition:border-color .2s, box-shadow .2s;
+      appearance:none;
+      -webkit-appearance:none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B6B6B' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat:no-repeat;
+      background-position:right 14px center;
+      padding-right:38px;
+      cursor:pointer;
+    }
+    .field input { background-image:none; padding-right:14px; cursor:text; }
+    .field input:focus, .field select:focus {
+      border-color:var(--red);
+      box-shadow:0 0 0 3px rgba(226,55,68,.1);
+    }
+    .field select option { padding:8px; }
+    .field-full { grid-column:1/-1; }
+
+    .rating-row { display:flex; align-items:center; gap:10px; }
+    .rating-row input[type=range] {
+      flex:1; border:none; box-shadow:none; padding:0;
+      accent-color:var(--red); cursor:pointer;
+    }
+    .rating-val {
+      font-size:0.9rem; font-weight:700; color:var(--red);
+      min-width:32px; text-align:right;
+    }
+
+    .btn-find {
+      width:100%; padding:14px;
+      background:var(--red); color:#fff;
+      border:none; border-radius:12px;
+      font-size:1rem; font-weight:700;
+      cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;
+      transition:background .2s, transform .15s, box-shadow .2s;
+    }
+    .btn-find:hover { background:var(--red-dark); box-shadow:0 4px 16px rgba(226,55,68,.35); transform:translateY(-1px); }
+    .btn-find:active { transform:translateY(0); }
+
+    /* ── CHIPS ── */
+    .chips { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-bottom:60px; }
+    .chip {
+      background:var(--white); border:1.5px solid var(--red-mid);
+      color:var(--red); border-radius:50px;
+      padding:7px 18px; font-size:0.83rem; font-weight:600;
+      cursor:pointer; transition:all .2s;
+    }
+    .chip:hover { background:var(--red); color:#fff; border-color:var(--red); transform:translateY(-2px); }
+
+    /* ── HOW IT WORKS ── */
+    .how { max-width:900px; margin:0 auto; padding:0 24px 72px; }
+    .how h2 { text-align:center; font-size:1.5rem; font-weight:700; margin-bottom:32px; }
+    .how-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
+    .how-card {
+      background:var(--white); border:1px solid var(--border);
+      border-radius:var(--radius); padding:28px 24px; text-align:center;
+      transition:transform .2s, box-shadow .2s;
+    }
+    .how-card:hover { transform:translateY(-4px); box-shadow:var(--shadow); }
+    .how-icon {
+      width:52px; height:52px; border-radius:14px;
+      background:var(--red-soft); display:flex; align-items:center; justify-content:center;
+      margin:0 auto 16px; font-size:1.4rem;
+    }
+    .how-card h3 { font-size:1rem; font-weight:700; margin-bottom:8px; }
+    .how-card p { font-size:0.85rem; color:var(--muted); line-height:1.6; }
+
+    /* ── RESULTS ── */
+    .results-section { max-width:900px; margin:0 auto; padding:0 24px 80px; }
+    .results-header {
+      display:flex; align-items:center; justify-content:space-between;
+      margin-bottom:24px;
+    }
+    .results-header h2 { font-size:1.4rem; font-weight:700; }
+    .results-meta { font-size:0.82rem; color:var(--muted); }
+
+    .results-grid { display:grid; gap:20px; }
+
+    /* Restaurant Card */
+    .rest-card {
+      background:var(--white); border:1px solid var(--border);
+      border-radius:var(--radius); overflow:hidden;
+      display:grid; grid-template-columns:auto 1fr;
+      box-shadow:var(--shadow);
+      transition:transform .25s, box-shadow .25s;
+      opacity:0; transform:translateY(20px);
+      animation:fadeUp .5s ease forwards;
+    }
+    .rest-card:nth-child(2) { animation-delay:.1s; }
+    .rest-card:nth-child(3) { animation-delay:.2s; }
+    @keyframes fadeUp { to { opacity:1; transform:translateY(0); } }
+    .rest-card:hover { transform:translateY(-4px); box-shadow:var(--shadow-lg); }
+
+    .card-rank {
+      width:56px; display:flex; flex-direction:column;
+      align-items:center; justify-content:flex-start;
+      padding:20px 0;
+      background:var(--red-soft);
+    }
+    .rank-num {
+      font-size:1.5rem; font-weight:800; color:var(--red); line-height:1;
+    }
+    .rank-label { font-size:0.65rem; color:var(--muted); margin-top:2px; text-transform:uppercase; letter-spacing:.4px; }
+
+    .card-body { padding:20px 24px 20px 20px; }
+    .card-top { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:8px; gap:12px; }
+    .card-name { font-size:1.1rem; font-weight:700; color:var(--text); }
+    .card-highlight {
+      background:var(--red-soft); color:var(--red);
+      font-size:0.72rem; font-weight:700; letter-spacing:.3px;
+      padding:4px 10px; border-radius:50px; white-space:nowrap;
+      border:1px solid var(--red-mid);
+    }
+
+    .card-meta { display:flex; flex-wrap:wrap; gap:14px; margin-bottom:12px; }
+    .meta-pill {
+      display:flex; align-items:center; gap:5px;
+      font-size:0.82rem; color:var(--muted); font-weight:500;
+    }
+    .meta-pill span { font-size:0.95rem; }
+
+    .card-cuisine {
+      font-size:0.8rem; color:var(--muted); margin-bottom:12px;
+      display:flex; align-items:center; gap:5px;
+    }
+
+    .card-explanation {
+      background:var(--red-soft); border-left:3px solid var(--red);
+      border-radius:0 8px 8px 0;
+      padding:10px 14px;
+      font-size:0.83rem; color:#444; line-height:1.55;
+      margin-bottom:14px;
+    }
+
+    .match-bar-wrap { display:flex; align-items:center; gap:10px; }
+    .match-bar-label { font-size:0.75rem; color:var(--muted); font-weight:600; min-width:72px; }
+    .match-bar-bg {
+      flex:1; height:6px; border-radius:50px;
+      background:var(--border); overflow:hidden;
+    }
+    .match-bar-fill {
+      height:100%; border-radius:50px;
+      background:linear-gradient(90deg, var(--red), #FF6B6B);
+      transition:width 1s ease;
+    }
+    .match-pct { font-size:0.82rem; font-weight:700; color:var(--red); min-width:38px; text-align:right; }
+
+    /* Stars */
+    .stars { color:#FFC107; font-size:0.85rem; letter-spacing:1px; }
+
+    /* ── STATES ── */
+    .state-box {
+      text-align:center; padding:64px 24px;
+      display:none;
+    }
+    .state-box.visible { display:block; }
+    .state-icon { font-size:3rem; margin-bottom:16px; }
+    .state-box h3 { font-size:1.1rem; font-weight:700; margin-bottom:8px; }
+    .state-box p { color:var(--muted); font-size:0.9rem; }
+
+    /* Loading spinner */
+    .spinner {
+      width:44px; height:44px; border:4px solid var(--red-mid);
+      border-top-color:var(--red); border-radius:50%;
+      animation:spin .7s linear infinite; margin:0 auto 20px;
+    }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:640px) {
+      nav { padding:0 16px; }
+      .hero { padding:48px 16px 32px; }
+      .search-grid { grid-template-columns:1fr; }
+      .how-grid { grid-template-columns:1fr; }
+      .rest-card { grid-template-columns:1fr; }
+      .card-rank { flex-direction:row; width:100%; padding:12px 20px; gap:8px; border-radius:0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Zomato AI</div>
+  <div class="nav-links">
+    <a href="#">⊙ Discover</a>
+    <a href="#">✦ Match</a>
+  </div>
+  <div class="nav-right">
+    <div class="nav-avatar">AI</div>
+  </div>
+</nav>
+
+<!-- HERO + SEARCH -->
+<section class="hero">
+  <h1>What are you craving?</h1>
+  <p>Let Zomato AI personalise your next meal. Tell us what you're in the mood for, and we'll find the perfect spot.</p>
+
+  <div class="search-card">
+    <div class="search-grid">
+      <div class="field">
+        <label>📍 Location</label>
+        <select id="inp-location">
+          <option value="">All Bangalore areas</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>🍽️ Cuisine</label>
+        <select id="inp-cuisine">
+          <option value="">Any Cuisine</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>💰 Budget (₹ for two)</label>
+        <input id="inp-budget" type="number" placeholder="500" value="500" min="100" step="50"/>
+      </div>
+      <div class="field">
+        <label>⭐ Min Rating: <span id="rating-display">4.0</span></label>
+        <div class="rating-row">
+          <input id="inp-rating" type="range" min="1" max="5" step="0.5" value="4"
+                 oninput="document.getElementById('rating-display').textContent=parseFloat(this.value).toFixed(1)"/>
+          <div class="rating-val" id="rating-val">4.0</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-find" id="btn-find" onclick="fetchRecommendations()">
+      <span>✦</span> Find Magic
+    </button>
+  </div>
+
+  <!-- Quick chips -->
+  <div class="chips">
+    <div class="chip" onclick="applyChip('South Indian','Bellandur',500,4)">🥘 South Indian · Bellandur</div>
+    <div class="chip" onclick="applyChip('North Indian','Koramangala',800,4)">🍛 North Indian · Koramangala</div>
+    <div class="chip" onclick="applyChip('Chinese','Indiranagar',600,4)">🥡 Chinese · Indiranagar</div>
+    <div class="chip" onclick="applyChip('Pizza','Whitefield',700,4)">🍕 Pizza · Whitefield</div>
+    <div class="chip" onclick="applyChip('Desserts','Brigade Road',400,4.5)">🍦 Desserts · Brigade Rd</div>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<div class="results-section" id="results-section" style="display:none">
+  <div class="results-header">
+    <h2 id="results-title">Top Picks for You</h2>
+    <div class="results-meta" id="results-meta"></div>
+  </div>
+
+  <!-- Loading -->
+  <div class="state-box" id="state-loading">
+    <div class="spinner"></div>
+    <h3>Finding perfect restaurants…</h3>
+    <p>Our AI is scanning the Zomato database for you</p>
+  </div>
+
+  <!-- Error -->
+  <div class="state-box" id="state-error">
+    <div class="state-icon">😕</div>
+    <h3>No matches found</h3>
+    <p id="error-msg">Try broadening your filters — different area or higher budget.</p>
+  </div>
+
+  <!-- Cards -->
+  <div class="results-grid" id="cards-grid"></div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how-section">
+  <h2>How Zomato AI Works</h2>
+  <div class="how-grid">
+    <div class="how-card">
+      <div class="how-icon">🧠</div>
+      <h3>Learns Your Taste</h3>
+      <p>Our AI filters 12,000+ Bangalore restaurants from the Zomato dataset to match your exact preferences.</p>
+    </div>
+    <div class="how-card">
+      <div class="how-icon">💬</div>
+      <h3>LLM-Powered Ranking</h3>
+      <p>Groq's LLaMA 3.3 model ranks shortlisted candidates and explains each recommendation in plain English.</p>
+    </div>
+    <div class="how-card">
+      <div class="how-icon">⚡</div>
+      <h3>Instant Insights</h3>
+      <p>Get top picks with AI explanations, match scores, and key details — all in under 10 seconds.</p>
+    </div>
+  </div>
+</section>
+
+<script>
+  // ── Populate dropdowns from API ───────────────────────────────
+  async function loadCuisinesForLocation(location, preserveValue) {
+    const cuisSel = document.getElementById('inp-cuisine');
+    const url = location
+      ? `/api/cuisines-by-location?location=${encodeURIComponent(location)}`
+      : '/api/cuisines';
+
+    try {
+      const res      = await fetch(url);
+      const cuisines = await res.json();
+
+      // Remember currently selected value
+      const prev = preserveValue || cuisSel.value;
+
+      // Rebuild options
+      cuisSel.innerHTML = '<option value="">Any Cuisine</option>';
+      const seen = new Set();
+      cuisines.forEach(c => {
+        const key = c.trim();
+        if (!key || seen.has(key.toLowerCase())) return;
+        seen.add(key.toLowerCase());
+        const opt = document.createElement('option');
+        opt.value = key;
+        opt.textContent = key;
+        cuisSel.appendChild(opt);
+      });
+
+      // Restore previous selection if still available, else default to South Indian
+      const opts = Array.from(cuisSel.options);
+      const matchPrev = opts.find(o => o.value.toLowerCase() === prev.toLowerCase());
+      const matchDef  = opts.find(o => o.value.toLowerCase() === 'south indian');
+      if (matchPrev) cuisSel.value = matchPrev.value;
+      else if (matchDef) cuisSel.value = matchDef.value;
+      else cuisSel.value = '';
+    } catch(e) {
+      console.warn('Could not load cuisines:', e);
+    }
+  }
+
+  async function loadDropdowns() {
+    try {
+      const locRes    = await fetch('/api/locations');
+      const locations = await locRes.json();
+      const locSel    = document.getElementById('inp-location');
+
+      // Populate locations
+      locations.forEach(loc => {
+        const opt = document.createElement('option');
+        opt.value = loc;
+        opt.textContent = loc;
+        if (loc === 'Bellandur') opt.selected = true;
+        locSel.appendChild(opt);
+      });
+
+      // Load cuisines for the default location (Bellandur)
+      await loadCuisinesForLocation('Bellandur', 'South Indian');
+
+      // Wire up location change → reload cuisines
+      locSel.addEventListener('change', () => {
+        loadCuisinesForLocation(locSel.value);
+      });
+    } catch(e) {
+      console.warn('Could not load dropdown options:', e);
+    }
+  }
+  loadDropdowns();
+
+  // ── Sync rating slider ────────────────────────────────────────
+  const ratingInput = document.getElementById('inp-rating');
+  ratingInput.addEventListener('input', () => {
+    const v = parseFloat(ratingInput.value).toFixed(1);
+    document.getElementById('rating-display').textContent = v;
+    document.getElementById('rating-val').textContent = v;
+  });
+
+  // ── Quick chips — set select value by matching option text ────
+  function setSelectValue(selectId, value) {
+    const sel = document.getElementById(selectId);
+    const opts = Array.from(sel.options);
+    const match = opts.find(o => o.value.toLowerCase() === value.toLowerCase()
+                               || o.text.toLowerCase().includes(value.toLowerCase()));
+    if (match) sel.value = match.value;
+    else sel.value = '';
+  }
+
+  async function applyChip(cuisine, location, budget, rating) {
+    setSelectValue('inp-location', location);
+    document.getElementById('inp-budget').value = budget;
+    document.getElementById('inp-rating').value = rating;
+    document.getElementById('rating-display').textContent = parseFloat(rating).toFixed(1);
+    document.getElementById('rating-val').textContent     = parseFloat(rating).toFixed(1);
+    await loadCuisinesForLocation(location, cuisine);
+    fetchRecommendations();
+    document.getElementById('results-section').scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+
+  async function fetchRecommendations() {
+    const locSel   = document.getElementById('inp-location');
+    const cuisSel  = document.getElementById('inp-cuisine');
+    const location = locSel.options[locSel.selectedIndex]?.value.trim() || '';
+    const cuisine  = cuisSel.options[cuisSel.selectedIndex]?.value.trim() || '';
+    const budget   = parseInt(document.getElementById('inp-budget').value) || 500;
+    const rating   = parseFloat(document.getElementById('inp-rating').value) || 4.0;
+
+    const section = document.getElementById('results-section');
+    section.style.display = 'block';
+    section.scrollIntoView({ behavior:'smooth', block:'start' });
+
+    showState('loading');
+    document.getElementById('btn-find').disabled = true;
+    document.getElementById('btn-find').innerHTML = '<div class="spinner" style="width:20px;height:20px;border-width:3px;margin:0"></div> Searching…';
+
+    try {
+      const resp = await fetch('/api/recommend', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ location, cuisine, budget, rating, top_n: 3 })
+      });
+      const data = await resp.json();
+
+      if (data.success && data.results.length > 0) {
+        showState('results');
+        renderCards(data, { location, cuisine, budget, rating });
+      } else {
+        showState('error');
+        document.getElementById('error-msg').textContent =
+          data.error || 'No restaurants found. Try different filters.';
+      }
+    } catch (err) {
+      showState('error');
+      document.getElementById('error-msg').textContent = 'Server error. Please try again.';
+    } finally {
+      document.getElementById('btn-find').disabled = false;
+      document.getElementById('btn-find').innerHTML = '<span>✦</span> Find Magic';
+    }
+  }
+
+  function showState(state) {
+    document.getElementById('state-loading').classList.remove('visible');
+    document.getElementById('state-error').classList.remove('visible');
+    document.getElementById('cards-grid').style.display = 'none';
+    if (state === 'loading')  document.getElementById('state-loading').classList.add('visible');
+    if (state === 'error')    document.getElementById('state-error').classList.add('visible');
+    if (state === 'results')  document.getElementById('cards-grid').style.display = 'grid';
+  }
+
+  function starRating(rating) {
+    const full  = Math.floor(rating);
+    const half  = rating % 1 >= 0.5 ? 1 : 0;
+    const empty = 5 - full - half;
+    return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(empty);
+  }
+
+  function renderCards(data, inputs) {
+    const grid = document.getElementById('cards-grid');
+    grid.innerHTML = '';
+
+    const loc    = inputs.location || 'Bangalore';
+    const cuis   = inputs.cuisine  || 'Any';
+    document.getElementById('results-title').textContent =
+      `Top ${data.results.length} ${cuis} Picks · ${loc}`;
+    document.getElementById('results-meta').textContent =
+      `${data.total_candidates} restaurants scanned · ${data.tokens_used} AI tokens used`;
+
+    data.results.forEach((r, idx) => {
+      const card = document.createElement('div');
+      card.className = 'rest-card';
+      card.style.animationDelay = `${idx * 0.12}s`;
+
+      const matchScore = r.match_score || (95 - idx * 7);
+      const rankLabels = ['🏆 Best Match', '🥈 Runner Up', '🥉 Third Pick'];
+
+      card.innerHTML = `
+        <div class="card-rank">
+          <div>
+            <div class="rank-num">${r.rank}</div>
+            <div class="rank-label">${idx === 0 ? 'Best' : idx === 1 ? '2nd' : '3rd'}</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="card-top">
+            <div class="card-name">${r.name}</div>
+            <div class="card-highlight">${r.highlight || rankLabels[idx]}</div>
+          </div>
+          <div class="card-meta">
+            <div class="meta-pill"><span>⭐</span> <strong>${r.rating}/5</strong> <span class="stars">${starRating(r.rating)}</span></div>
+            <div class="meta-pill"><span>💰</span> ₹${r.cost} for two</div>
+            <div class="meta-pill"><span>📍</span> ${r.area}</div>
+          </div>
+          <div class="card-cuisine"><span>🍽️</span> ${r.cuisine}</div>
+          <div class="card-explanation">${r.explanation}</div>
+          <div class="match-bar-wrap">
+            <div class="match-bar-label">AI Match</div>
+            <div class="match-bar-bg">
+              <div class="match-bar-fill" style="width:0%" data-target="${matchScore}"></div>
+            </div>
+            <div class="match-pct">${matchScore}%</div>
+          </div>
+        </div>`;
+
+      grid.appendChild(card);
+
+      // Animate bar after paint
+      setTimeout(() => {
+        const bar = card.querySelector('.match-bar-fill');
+        if (bar) bar.style.width = bar.dataset.target + '%';
+      }, 100 + idx * 120);
+    });
+  }
+</script>
+</body>
+</html>
