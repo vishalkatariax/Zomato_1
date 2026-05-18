@@ -19,7 +19,11 @@ app = Flask(__name__)
 CORS(app)
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-client = Groq(api_key=GROQ_API_KEY)
+
+def get_groq_client():
+    if not GROQ_API_KEY:
+        raise ValueError("GROQ_API_KEY environment variable is missing. Please configure it in Railway.")
+    return Groq(api_key=GROQ_API_KEY)
 
 # Load dataset once at startup
 print("📂 Loading Zomato Bangalore dataset...")
@@ -91,6 +95,7 @@ Select and rank the BEST {top_n} restaurants. For EACH restaurant return a JSON 
 Respond ONLY with a valid JSON array, no extra text. Example format:
 [{{"rank":1,"name":"...","area":"...","cuisine":"...","rating":4.5,"cost":300,"match_score":95,"explanation":"...","highlight":"..."}}]"""
 
+    client = get_groq_client()
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         messages=[
