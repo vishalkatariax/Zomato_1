@@ -184,6 +184,6 @@ def cuisines_by_location():
 
 
 if __name__ == "__main__":
-    print("🚀 Starting Zomato AI Restaurant Recommendation App...")
-    print("   Open: http://localhost:5050")
-    app.run(debug=True, port=5050, host="0.0.0.0")
+    port = int(os.environ.get("PORT", 5050))
+    print(f"🚀 Starting Zomato AI Restaurant Recommendation App on port {port}...")
+    app.run(host="0.0.0.0", port=port)
