@@ -23,7 +23,10 @@ client = Groq(api_key=GROQ_API_KEY)
 
 # Load dataset once at startup
 print("📂 Loading Zomato Bangalore dataset...")
-df = pd.read_csv("data/processed/restaurants_cleaned.csv")
+# Make path absolute relative to this script so it works from any directory
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+csv_path = os.path.join(BASE_DIR, "data", "processed", "restaurants_cleaned.csv")
+df = pd.read_csv(csv_path)
 df["cuisine_lower"]  = df["cuisine"].str.lower().str.strip()
 df["location_lower"] = df["location"].str.lower().str.strip()
 print(f"   ✅ {len(df)} records loaded.")
