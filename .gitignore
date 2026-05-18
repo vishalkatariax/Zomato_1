@@ -46,7 +46,6 @@ ENV/
 *.swo
 
 # Data files (large — load from HuggingFace instead)
-data/processed/restaurants_cleaned.csv
 data/processed/restaurants_cleaned.sqlite3
 
 # Logs
