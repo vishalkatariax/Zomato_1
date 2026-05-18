@@ -381,12 +381,18 @@
 </section>
 
 <script>
+  // ── API Configuration ───────────────────────────────────────────
+  // Determine backend URL based on current host
+  const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:5050'
+    : 'https://zomato-ai-backend.onrender.com'; // Replace with actual Render URL
+
   // ── Populate dropdowns from API ───────────────────────────────
   async function loadCuisinesForLocation(location, preserveValue) {
     const cuisSel = document.getElementById('inp-cuisine');
     const url = location
-      ? `/api/cuisines-by-location?location=${encodeURIComponent(location)}`
-      : '/api/cuisines';
+      ? `${API_BASE}/api/cuisines-by-location?location=${encodeURIComponent(location)}`
+      : `${API_BASE}/api/cuisines`;
 
     try {
       const res      = await fetch(url);
@@ -422,7 +428,7 @@
 
   async function loadDropdowns() {
     try {
-      const locRes    = await fetch('/api/locations');
+      const locRes    = await fetch(`${API_BASE}/api/locations`);
       const locations = await locRes.json();
       const locSel    = document.getElementById('inp-location');
 
@@ -494,7 +500,7 @@
     document.getElementById('btn-find').innerHTML = '<div class="spinner" style="width:20px;height:20px;border-width:3px;margin:0"></div> Searching…';
 
     try {
-      const resp = await fetch('/api/recommend', {
+      const resp = await fetch(`${API_BASE}/api/recommend`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ location, cuisine, budget, rating, top_n: 3 })

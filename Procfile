@@ -1,1 +1,1 @@
-web: streamlit run streamlit_app.py --server.port=$PORT --server.headless=true
+web: gunicorn --chdir src restaurant_app:app

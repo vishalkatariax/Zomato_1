@@ -118,7 +118,7 @@ Respond ONLY with a valid JSON array, no extra text. Example format:
 
 @app.route("/")
 def index():
-    return render_template("zomato_index.html")
+    return jsonify({"status": "ok", "message": "Zomato AI Backend is running"}), 200
 
 
 @app.route("/api/recommend", methods=["POST"])
