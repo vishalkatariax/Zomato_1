@@ -4,15 +4,8 @@ services:
     env: python
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn --bind 0.0.0.0:$PORT app:app
-    healthCheckPath: /health
+    startCommand: gunicorn --chdir src restaurant_app:app
     envVars:
       - key: FLASK_ENV
         value: production
-      - key: PORT
-        value: 5000
     autoDeploy: true
-    disk:
-      name: restaurant-data
-      mountPath: /app/data
-      sizeGB: 1
