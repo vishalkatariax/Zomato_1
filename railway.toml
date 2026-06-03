@@ -2,5 +2,5 @@
 builder = "NIXPACKS"
 
 [deploy]
-startCommand = "python src/restaurant_app.py"
+startCommand = "python src/app.py"
 restartPolicyType = "ON_FAILURE"
