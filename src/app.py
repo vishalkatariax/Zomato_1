@@ -4,13 +4,14 @@ Production-ready Flask application for Restaurant Recommendation System
 """
 
 import os
-import json
+import sys
+sys.path.insert(0, '/Users/vishalkataria/Documents/Zomato_AI_recommendation')
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 from working_complete_system import WorkingCompleteSystem
 from phase7_working import Phase7WorkingSystem
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='/Users/vishalkataria/Documents/Zomato_AI_recommendation/templates')
 CORS(app)
 
 # Initialize systems
@@ -188,6 +189,37 @@ def get_restaurants():
             'success': False,
             'error': str(e)
         }), 500
+
+@app.route('/api/locations')
+def get_locations():
+    """Get available locations"""
+    try:
+        locations = phase5_system.get_locations()
+        return jsonify(locations)
+        
+    except Exception as e:
+        return jsonify([])
+
+@app.route('/api/cuisines')
+def get_cuisines():
+    """Get available cuisines"""
+    try:
+        cuisines = phase5_system.get_all_cuisines()
+        return jsonify(cuisines)
+        
+    except Exception as e:
+        return jsonify([])
+
+@app.route('/api/cuisines-by-location')
+def get_cuisines_by_location():
+    """Get cuisines for a specific location"""
+    try:
+        location = request.args.get('location', '')
+        cuisines = phase5_system.get_cuisines_by_location(location)
+        return jsonify(cuisines)
+        
+    except Exception as e:
+        return jsonify([])
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

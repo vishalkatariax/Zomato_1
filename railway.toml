@@ -2,5 +2,5 @@
 builder = "NIXPACKS"
 
 [deploy]
-startCommand = "bash -c 'gunicorn --bind 0.0.0.0:$PORT --chdir src restaurant_app:app'"
+startCommand = "python src/restaurant_app.py"
 restartPolicyType = "ON_FAILURE"
