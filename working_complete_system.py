@@ -73,10 +73,56 @@ class WorkingCompleteSystem:
                 'recommendations': []
             }
     
+    def _load_restaurants_from_csv(self) -> List[Dict]:
+        """Load restaurant data from HuggingFace CSV dataset"""
+        csv_path = '/Users/vishalkataria/Documents/Zomato_AI_recommendation/data/processed/restaurants_cleaned.csv'
+        try:
+            import pandas as pd
+            df = pd.read_csv(csv_path)
+            
+            restaurants = []
+            for idx, row in df.iterrows():
+                # Clean cuisine field
+                cuisine = str(row['cuisine']) if pd.notna(row['cuisine']) else ''
+                cuisines = cuisine.replace('"', '').replace('[', '').replace(']', '').replace('\'', '')
+                
+                # Clean location field
+                location = str(row['location']) if pd.notna(row['location']) else ''
+                location = location.replace('"', '').replace('[', '').replace(']', '').replace('\'', '')
+                
+                # Get cost and rating
+                cost = float(row['estimated_cost']) if pd.notna(row['estimated_cost']) else 500
+                rating = float(row['rating']) if pd.notna(row['rating']) else 4.0
+                
+                # Handle NaN
+                if pd.isna(cost) or pd.isna(rating):
+                    continue
+                
+                restaurants.append({
+                    'id': f'rest_{idx:05d}',
+                    'name': str(row['restaurant_name']).strip(),
+                    'cuisines': cuisines,
+                    'rating': round(rating, 1),
+                    'cost': int(cost),
+                    'location': location.strip()
+                })
+            
+            return restaurants
+        except Exception as e:
+            print(f"Warning: Could not load CSV ({e}), using mock data")
+            return []
+
     def _get_mock_restaurants(self) -> List[Dict]:
         """Get mock restaurant database with multiple locations"""
+        # First try to load from CSV
+        csv_data = self._load_restaurants_from_csv()
+        if csv_data and len(csv_data) > 100:
+            print(f"Loaded {len(csv_data)} restaurants from CSV")
+            return csv_data
+        
+        # Fallback to mock data
         return [
-            # Bellandur
+            # Bellandur (5 restaurants)
             {'id': 'rest_001', 'name': 'Trattoria Italiana', 'cuisines': 'Italian', 'rating': 4.5, 'cost': 1200, 'location': 'Bellandur'},
             {'id': 'rest_002', 'name': 'Pasta Paradise', 'cuisines': 'Italian, Pizza', 'rating': 4.4, 'cost': 800, 'location': 'Bellandur'},
             {'id': 'rest_002b', 'name': 'Marco Polo Italian Kitchen', 'cuisines': 'Italian, Continental', 'rating': 4.6, 'cost': 1100, 'location': 'Bellandur'},
@@ -87,19 +133,60 @@ class WorkingCompleteSystem:
             {'id': 'rest_006', 'name': 'Vegetarian Delight', 'cuisines': 'Vegetarian, Vegan', 'rating': 4.3, 'cost': 500, 'location': 'Bellandur'},
             {'id': 'rest_007', 'name': 'Spicy Garden', 'cuisines': 'Indian, Spicy', 'rating': 4.2, 'cost': 700, 'location': 'Bellandur'},
             {'id': 'rest_008', 'name': 'Seafood Paradise', 'cuisines': 'Seafood', 'rating': 4.5, 'cost': 2000, 'location': 'Bellandur'},
-            # Koramangala
+            # Koramangala (6 restaurants)
             {'id': 'rest_009', 'name': 'Koramangala Burger Co', 'cuisines': 'American, Burger', 'rating': 4.3, 'cost': 900, 'location': 'Koramangala'},
             {'id': 'rest_010', 'name': 'South Star', 'cuisines': 'South Indian', 'rating': 4.6, 'cost': 400, 'location': 'Koramangala'},
             {'id': 'rest_011', 'name': 'Bakers Brew', 'cuisines': 'Bakery, Coffee', 'rating': 4.4, 'cost': 600, 'location': 'Koramangala'},
-            # Indiranagar
+            {'id': 'rest_018', 'name': 'Koramangala Social', 'cuisines': 'American, Bar', 'rating': 4.5, 'cost': 1500, 'location': 'Koramangala'},
+            {'id': 'rest_019', 'name': 'High on Chocolate', 'cuisines': 'Desserts, Bakery', 'rating': 4.4, 'cost': 800, 'location': 'Koramangala'},
+            {'id': 'rest_020', 'name': 'The Big Bowl', 'cuisines': 'Chinese, Thai', 'rating': 4.2, 'cost': 600, 'location': 'Koramangala'},
+            # Indiranagar (6 restaurants)
             {'id': 'rest_012', 'name': 'Indiranagar Dosa', 'cuisines': 'South Indian', 'rating': 4.5, 'cost': 450, 'location': 'Indiranagar'},
             {'id': 'rest_013', 'name': 'The Chinese Zone', 'cuisines': 'Chinese, Thai', 'rating': 4.2, 'cost': 600, 'location': 'Indiranagar'},
-            # Brigade Road
+            {'id': 'rest_021', 'name': 'The Belgian Waffle Co', 'cuisines': 'Desserts, Bakery', 'rating': 4.6, 'cost': 700, 'location': 'Indiranagar'},
+            {'id': 'rest_022', 'name': 'Punjab Grill', 'cuisines': 'North Indian', 'rating': 4.7, 'cost': 2500, 'location': 'Indiranagar'},
+            {'id': 'rest_023', 'name': 'Nando\'s', 'cuisines': 'Portuguese, Chicken', 'rating': 4.3, 'cost': 1200, 'location': 'Indiranagar'},
+            {'id': 'rest_024', 'name': 'Taco Bell', 'cuisines': 'Mexican, Fast Food', 'rating': 4.1, 'cost': 500, 'location': 'Indiranagar'},
+            # Brigade Road (5 restaurants)
             {'id': 'rest_014', 'name': 'Brigade Road Sweets', 'cuisines': 'Desserts, Indian', 'rating': 4.8, 'cost': 500, 'location': 'Brigade Road'},
             {'id': 'rest_015', 'name': 'Roadhouse', 'cuisines': 'American, Bar', 'rating': 4.1, 'cost': 1200, 'location': 'Brigade Road'},
-            # Whitefield
+            {'id': 'rest_025', 'name': 'Cafe Coffee Day', 'cuisines': 'Coffee, Snacks', 'rating': 4.0, 'cost': 300, 'location': 'Brigade Road'},
+            {'id': 'rest_026', 'name': 'Bikanerwala', 'cuisines': 'North Indian, Rajasthani', 'rating': 4.4, 'cost': 800, 'location': 'Brigade Road'},
+            {'id': 'rest_027', 'name': 'Mumtaz', 'cuisines': 'Mughlai, North Indian', 'rating': 4.3, 'cost': 1500, 'location': 'Brigade Road'},
+            # Whitefield (6 restaurants)
             {'id': 'rest_016', 'name': 'Whitefield Pizza', 'cuisines': 'Pizza, Italian', 'rating': 4.4, 'cost': 700, 'location': 'Whitefield'},
             {'id': 'rest_017', 'name': 'IT Park Cafe', 'cuisines': 'Continental, Coffee', 'rating': 4.0, 'cost': 800, 'location': 'Whitefield'},
+            {'id': 'rest_028', 'name': 'Waffle & More', 'cuisines': 'Desserts, Bakery', 'rating': 4.5, 'cost': 600, 'location': 'Whitefield'},
+            {'id': 'rest_029', 'name': 'Pai Vihar', 'cuisines': 'South Indian, Mangalorean', 'rating': 4.6, 'cost': 700, 'location': 'Whitefield'},
+            {'id': 'rest_030', 'name': 'Soul Ristorante', 'cuisines': 'Italian, Mediterranean', 'rating': 4.7, 'cost': 1800, 'location': 'Whitefield'},
+            {'id': 'rest_031', 'name': 'Chipotle', 'cuisines': 'Mexican, Fast Food', 'rating': 4.2, 'cost': 900, 'location': 'Whitefield'},
+            # Jayanagar (4 restaurants)
+            {'id': 'rest_032', 'name': 'Vijayanagar Hotel', 'cuisines': 'South Indian', 'rating': 4.6, 'cost': 500, 'location': 'Jayanagar'},
+            {'id': 'rest_033', 'name': 'MTR 1918', 'cuisines': 'South Indian, Karnataka', 'rating': 4.8, 'cost': 800, 'location': 'Jayanagar'},
+            {'id': 'rest_034', 'name': 'Puranik Sweets', 'cuisines': 'Desserts, Indian', 'rating': 4.5, 'cost': 600, 'location': 'Jayanagar'},
+            {'id': 'rest_035', 'name': 'Chutneys', 'cuisines': 'South Indian', 'rating': 4.4, 'cost': 400, 'location': 'Jayanagar'},
+            # Banashankari (4 restaurants)
+            {'id': 'rest_036', 'name': 'Gourmet Burger Factory', 'cuisines': 'American, Burger', 'rating': 4.3, 'cost': 900, 'location': 'Banashankari'},
+            {'id': 'rest_037', 'name': 'Pandarige Hotel', 'cuisines': 'South Indian, Mangalorean', 'rating': 4.5, 'cost': 600, 'location': 'Banashankari'},
+            {'id': 'rest_038', 'name': 'Nagarjuna', 'cuisines': 'Andhra, North Indian', 'rating': 4.4, 'cost': 1000, 'location': 'Banashankari'},
+            {'id': 'rest_039', 'name': 'TheChocolateRoom', 'cuisines': 'Desserts, Bakery', 'rating': 4.6, 'cost': 700, 'location': 'Banashankari'},
+            # Marathahalli (5 restaurants)
+            {'id': 'rest_040', 'name': 'Olive Bistro', 'cuisines': 'Italian, Mediterranean', 'rating': 4.5, 'cost': 1500, 'location': 'Marathahalli'},
+            {'id': 'rest_041', 'name': 'Empire Restaurant', 'cuisines': 'North Indian, Mughlai', 'rating': 4.3, 'cost': 900, 'location': 'Marathahalli'},
+            {'id': 'rest_042', 'name': 'Chutney\'s', 'cuisines': 'South Indian', 'rating': 4.4, 'cost': 500, 'location': 'Marathahalli'},
+            {'id': 'rest_043', 'name': 'Starbucks', 'cuisines': 'Coffee, Snacks', 'rating': 4.2, 'cost': 600, 'location': 'Marathahalli'},
+            {'id': 'rest_044', 'name': 'Grameen Kalyana', 'cuisines': 'South Indian', 'rating': 4.5, 'cost': 700, 'location': 'Marathahalli'},
+            # Hebbal (4 restaurants)
+            {'id': 'rest_045', 'name': 'Bosphorus Turkish Kitchen', 'cuisines': 'Turkish, Middle Eastern', 'rating': 4.4, 'cost': 1400, 'location': 'Hebbal'},
+            {'id': 'rest_046', 'name': 'Korean Street Food', 'cuisines': 'Korean, Asian', 'rating': 4.3, 'cost': 800, 'location': 'Hebbal'},
+            {'id': 'rest_047', 'name': 'The Brew Meister', 'cuisines': 'Brewery, American', 'rating': 4.5, 'cost': 1600, 'location': 'Hebbal'},
+            {'id': 'rest_048', 'name': 'Mughal Darbar', 'cuisines': 'Mughlai, North Indian', 'rating': 4.2, 'cost': 1100, 'location': 'Hebbal'},
+            # BTM (5 restaurants)
+            {'id': 'rest_049', 'name': 'Nandhini Delicacies', 'cuisines': 'South Indian', 'rating': 4.7, 'cost': 500, 'location': 'BTM'},
+            {'id': 'rest_050', 'name': 'Biryani Blues', 'cuisines': 'Hyderabadi, North Indian', 'rating': 4.4, 'cost': 1200, 'location': 'BTM'},
+            {'id': 'rest_051', 'name': 'Naked Pizza', 'cuisines': 'Pizza, Italian', 'rating': 4.5, 'cost': 900, 'location': 'BTM'},
+            {'id': 'rest_052', 'name': 'Glen\'s Bakehouse', 'cuisines': 'Bakery, Desserts', 'rating': 4.6, 'cost': 800, 'location': 'BTM'},
+            {'id': 'rest_053', 'name': 'Paradise Biryani', 'cuisines': 'Hyderabadi, North Indian', 'rating': 4.3, 'cost': 1000, 'location': 'BTM'},
         ]
     
     def _filter_restaurants(self, restaurants: List[Dict], location: str, 
