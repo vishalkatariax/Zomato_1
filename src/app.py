@@ -5,13 +5,12 @@ Production-ready Flask application for Restaurant Recommendation System
 
 import os
 import sys
-sys.path.insert(0, '/Users/vishalkataria/Documents/Zomato_AI_recommendation')
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 from working_complete_system import WorkingCompleteSystem
 from phase7_working import Phase7WorkingSystem
 
-app = Flask(__name__, template_folder='/Users/vishalkataria/Documents/Zomato_AI_recommendation/templates')
+app = Flask(__name__, template_folder=os.path.join(os.path.dirname(__file__), '..', 'templates'))
 CORS(app)
 
 # Initialize systems
