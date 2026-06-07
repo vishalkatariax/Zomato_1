@@ -129,7 +129,21 @@ def index():
     return jsonify({"status": "ok", "message": "Zomato AI Backend is running"}), 200
 
 
+def _format_recommendation_response(result):
+    """Normalize backend payload for both /api/recommend and /api/recommendations."""
+    return {
+        "success": result.get("success", False),
+        "recommendations": result.get("results", []),
+        "results": result.get("results", []),
+        "total_restaurants": result.get("total_candidates", 0),
+        "total_candidates": result.get("total_candidates", 0),
+        "error": result.get("error"),
+        "tokens_used": result.get("tokens_used"),
+    }
+
+
 @app.route("/api/recommend", methods=["POST"])
+@app.route("/api/recommendations", methods=["POST"])
 def recommend():
     try:
         data     = request.get_json()
@@ -140,10 +154,15 @@ def recommend():
         top_n    = int(data.get("top_n", 3))
 
         result = get_recommendations(location, cuisine, budget, rating, top_n)
-        return jsonify(result)
+        return jsonify(_format_recommendation_response(result))
 
     except Exception as e:
-        return jsonify({"success": False, "error": str(e), "results": []}), 500
+        return jsonify({"success": False, "error": str(e), "recommendations": [], "results": []}), 500
+
+
+@app.route("/health")
+def health():
+    return jsonify({"status": "healthy", "records": len(df)}), 200
 
 
 @app.route("/api/locations")

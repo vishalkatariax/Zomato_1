@@ -382,10 +382,10 @@
 
 <script>
   // ── API Configuration ───────────────────────────────────────────
-  // Determine backend URL based on current host
+  // Local dev hits Flask directly; Vercel proxies /api/* to Railway (see vercel.json)
   const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-    ? 'http://localhost:5000'
-    : 'https://web-production-289a3.up.railway.app';
+    ? 'http://localhost:5050'
+    : window.location.origin;
 
   // ── Populate dropdowns from API ───────────────────────────────
   async function loadCuisinesForLocation(location, preserveValue) {
@@ -506,10 +506,12 @@
         body: JSON.stringify({ location, cuisine, budget, rating, top_n: 3 })
       });
       const data = await resp.json();
+      const recommendations = data.recommendations || data.results || [];
+      const payload = { ...data, recommendations };
 
-      if (data.success && data.recommendations.length > 0) {
+      if (data.success && recommendations.length > 0) {
         showState('results');
-        renderCards(data, { location, cuisine, budget, rating });
+        renderCards(payload, { location, cuisine, budget, rating });
       } else {
         showState('error');
         document.getElementById('error-msg').textContent =
@@ -549,7 +551,7 @@
     document.getElementById('results-title').textContent =
       `Top ${data.recommendations.length} ${cuis} Picks · ${loc}`;
     document.getElementById('results-meta').textContent =
-      `${data.total_restaurants} restaurants scanned`;
+      `${data.total_restaurants ?? data.total_candidates ?? 0} restaurants scanned`;
 
     data.recommendations.forEach((r, idx) => {
       const card = document.createElement('div');

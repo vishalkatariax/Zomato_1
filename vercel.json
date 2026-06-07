@@ -1,9 +1,17 @@
 {
-  "buildCommand": "echo 'No build required for static frontend'",
-  "installCommand": "echo 'No install required for static frontend'",
-  "outputDirectory": ".",
+  "buildCommand": "echo 'Static frontend — no build step'",
+  "installCommand": "echo 'Static frontend — no install step'",
   "framework": null,
+  "outputDirectory": ".",
   "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://web-production-289a3.up.railway.app/api/:path*"
+    },
+    {
+      "source": "/health",
+      "destination": "https://web-production-289a3.up.railway.app/health"
+    },
     {
       "source": "/(.*)",
       "destination": "/index.html"
