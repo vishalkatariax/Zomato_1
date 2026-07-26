@@ -6,11 +6,11 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://<YOUR-RENDER-APP-NAME>.onrender.com/api/:path*"
+      "destination": "https://zomato-1-sgoa.onrender.com/api/:path*"
     },
     {
       "source": "/health",
-      "destination": "https://<YOUR-RENDER-APP-NAME>.onrender.com/health"
+      "destination": "https://zomato-1-sgoa.onrender.com/health"
     },
     {
       "source": "/(.*)",
