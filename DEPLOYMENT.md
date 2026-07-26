@@ -38,7 +38,7 @@ Required environment variables:
 The backend is automatically deployed from GitHub when you push changes.
 
 **Configuration Files:**
-- `Procfile`: `web: gunicorn --chdir src restaurant_app:app`
+- `Procfile`: `web: gunicorn app:app`
 - `render.toml`: Uses NIXPACKS builder
 - `requirements.txt`: Python dependencies
 
@@ -100,14 +100,14 @@ cp .env.example .env
 # Edit .env and add GROQ_API_KEY
 
 # Run backend
-python src/restaurant_app.py
+python app.py
 ```
 Backend runs on: http://localhost:5050
 
 ### Frontend (Static)
 ```bash
 # Option 1: Use Flask backend (serves both API and frontend)
-python src/restaurant_app.py
+python app.py
 # Access at: http://localhost:5050
 
 # Option 2: Run static file server separately
@@ -120,7 +120,7 @@ python3 -m http.server 8080
 
 ### Render Issues
 **Problem**: Backend crashes on startup with FileNotFoundError
-- **Solution**: Ensure the dataset path in `src/restaurant_app.py` is correct. The BASE_DIR logic should resolve the path correctly.
+- **Solution**: Ensure the dataset path in `app.py` is correct. The BASE_DIR logic should resolve the path correctly.
 
 **Problem**: API calls failing from Vercel
 - **Solution**: 
@@ -142,7 +142,7 @@ python3 -m http.server 8080
   - Test Render API directly first
 
 ### Common Issues
-1. **CORS Errors**: Ensure `CORS(app)` is configured in `src/restaurant_app.py`
+1. **CORS Errors**: Ensure `CORS(app)` is configured in `app.py`
 2. **API Limitations**: Monitor Groq API usage to avoid throttling
 3. **Dataset Loading**: Ensure the CSV file exists in `data/processed/restaurants_cleaned.csv`
 

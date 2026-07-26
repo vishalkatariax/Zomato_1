@@ -1,1 +1,1 @@
-web: gunicorn --chdir src restaurant_app:app
+web: gunicorn app:app

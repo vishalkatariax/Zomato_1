@@ -34,7 +34,7 @@ Frontend (Vercel) → API Requests → Backend (Render)
 
 ### Phase 2: Backend Deployment (Render)
 
-1. Ensure your backend files (`src/restaurant_app.py`, `requirements.txt`, `Procfile`) are in the repository. The `Procfile` tells Render how to start the app: `web: gunicorn --chdir src restaurant_app:app`.
+1. Ensure your backend files (`app.py`, `requirements.txt`, `Procfile`) are in the repository. The `Procfile` tells Render how to start the app: `web: gunicorn app:app`.
 2. Log into [Render](https://render.app/) and create a "New Project".
 3. Select "Deploy from GitHub repo" and choose this repository.
 4. Render will automatically detect the Python environment and build it.
@@ -65,6 +65,6 @@ Frontend (Vercel) → API Requests → Backend (Render)
 ## Troubleshooting
 
 ### Common Issues
-1. **File Not Found Errors**: If the backend crashes on startup with a `FileNotFoundError` for the CSV dataset, ensure the `BASE_DIR` logic in `src/restaurant_app.py` is resolving correctly relative to where Render runs the app.
-2. **CORS Errors**: If the frontend cannot communicate with the backend, verify that `CORS(app)` is configured correctly in `src/restaurant_app.py` and that the `API_BASE` domain exactly matches the Render domain.
+1. **File Not Found Errors**: If the backend crashes on startup with a `FileNotFoundError` for the CSV dataset, ensure the `BASE_DIR` logic in `app.py` is resolving correctly relative to where Render runs the app.
+2. **CORS Errors**: If the frontend cannot communicate with the backend, verify that `CORS(app)` is configured correctly in `app.py` and that the `API_BASE` domain exactly matches the Render domain.
 3. **API Limitations**: Keep an eye on your Groq API limits to ensure requests are not throttled.
