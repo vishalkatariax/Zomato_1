@@ -6,11 +6,11 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://zomato1-production.up.railway.app/api/:path*"
+      "destination": "https://<YOUR-RENDER-APP-NAME>.onrender.com/api/:path*"
     },
     {
       "source": "/health",
-      "destination": "https://zomato1-production.up.railway.app/health"
+      "destination": "https://<YOUR-RENDER-APP-NAME>.onrender.com/health"
     },
     {
       "source": "/(.*)",

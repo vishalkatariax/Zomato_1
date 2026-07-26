@@ -3,53 +3,53 @@
 ## Architecture Overview
 
 ```
-Frontend (Vercel) → API Requests → Backend (Railway)
+Frontend (Vercel) → API Requests → Backend (Render)
 ```
 
 - **Frontend**: Static HTML/JS deployed on Vercel
-- **Backend**: Flask API deployed on Railway with Groq LLaMA 3.3
-- **Connection**: Vercel proxies API requests to Railway via vercel.json rewrites
+- **Backend**: Flask API deployed on Render with Groq LLaMA 3.3
+- **Connection**: Vercel proxies API requests to Render via vercel.json rewrites
 
 ## Environment Variables
 
 ### Vercel (Frontend)
 **No environment variables required.**
 
-The frontend is a static site that uses vercel.json rewrites to proxy API requests to the Railway backend. All API calls go through the Vercel domain and are automatically forwarded to Railway.
+The frontend is a static site that uses vercel.json rewrites to proxy API requests to the Render backend. All API calls go through the Vercel domain and are automatically forwarded to Render.
 
-### Railway (Backend)
+### Render (Backend)
 Required environment variables:
 
 | Variable | Description | How to Set |
 |----------|-------------|------------|
-| `GROQ_API_KEY` | Your Groq API key for LLaMA 3.3 access | Add in Railway dashboard → Variables tab |
-| `PORT` | Port for the application (optional) | Railway sets this automatically |
+| `GROQ_API_KEY` | Your Groq API key for LLaMA 3.3 access | Add in Render dashboard → Variables tab |
+| `PORT` | Port for the application (optional) | Render sets this automatically |
 
 **Getting a Groq API Key:**
 1. Visit https://console.groq.com
 2. Sign up/login
 3. Create a new API key
-4. Copy the key and add it to Railway variables
+4. Copy the key and add it to Render variables
 
 ## Deployment Steps
 
-### 1. Railway (Backend) Deployment
+### 1. Render (Backend) Deployment
 
 The backend is automatically deployed from GitHub when you push changes.
 
 **Configuration Files:**
 - `Procfile`: `web: gunicorn --chdir src restaurant_app:app`
-- `railway.toml`: Uses NIXPACKS builder
+- `render.toml`: Uses NIXPACKS builder
 - `requirements.txt`: Python dependencies
 
 **Setup Steps:**
-1. Connect your GitHub repository to Railway
-2. Railway will automatically detect the Python configuration
-3. Add `GROQ_API_KEY` in Railway Variables tab
-4. Railway will build and deploy automatically
+1. Connect your GitHub repository to Render
+2. Render will automatically detect the Python configuration
+3. Add `GROQ_API_KEY` in Render Variables tab
+4. Render will build and deploy automatically
 
 **Verify Deployment:**
-- Check health endpoint: `https://zomato1-production.up.railway.app/health`
+- Check health endpoint: `https://<YOUR-RENDER-APP-NAME>.onrender.com/health`
 - Should return: `{"records":12119,"status":"healthy"}`
 
 ### 2. Vercel (Frontend) Deployment
@@ -57,7 +57,7 @@ The backend is automatically deployed from GitHub when you push changes.
 The frontend is automatically deployed from GitHub when you push changes.
 
 **Configuration Files:**
-- `vercel.json`: Proxies API requests to Railway
+- `vercel.json`: Proxies API requests to Render
 - `.vercelignore`: Excludes backend files from Vercel build
 - `index.html`: Main frontend file
 
@@ -69,8 +69,8 @@ The frontend is automatically deployed from GitHub when you push changes.
 
 **How API Proxying Works:**
 The `vercel.json` file contains rewrites that:
-- Forward `/api/*` requests to `https://zomato1-production.up.railway.app/api/*`
-- Forward `/health` requests to `https://zomato1-production.up.railway.app/health`
+- Forward `/api/*` requests to `https://<YOUR-RENDER-APP-NAME>.onrender.com/api/*`
+- Forward `/health` requests to `https://<YOUR-RENDER-APP-NAME>.onrender.com/health`
 - Serve all other routes from `index.html` (SPA routing)
 
 **Frontend API Configuration:**
@@ -83,7 +83,7 @@ const API_BASE = window.location.hostname === 'localhost' || window.location.hos
 
 This means:
 - Local development: Calls `http://localhost:5050` directly
-- Production: Calls the Vercel domain, which proxies to Railway
+- Production: Calls the Vercel domain, which proxies to Render
 
 ## Local Development
 
@@ -118,15 +118,15 @@ python3 -m http.server 8080
 
 ## Troubleshooting
 
-### Railway Issues
+### Render Issues
 **Problem**: Backend crashes on startup with FileNotFoundError
 - **Solution**: Ensure the dataset path in `src/restaurant_app.py` is correct. The BASE_DIR logic should resolve the path correctly.
 
 **Problem**: API calls failing from Vercel
 - **Solution**: 
-  - Verify Railway URL in `vercel.json` is correct
-  - Check Railway health endpoint is accessible
-  - Ensure GROQ_API_KEY is set in Railway variables
+  - Verify Render URL in `vercel.json` is correct
+  - Check Render health endpoint is accessible
+  - Ensure GROQ_API_KEY is set in Render variables
 
 ### Vercel Issues
 **Problem**: Frontend not loading
@@ -139,7 +139,7 @@ python3 -m http.server 8080
 - **Solution**:
   - Check browser console for CORS errors
   - Verify vercel.json rewrites are correct
-  - Test Railway API directly first
+  - Test Render API directly first
 
 ### Common Issues
 1. **CORS Errors**: Ensure `CORS(app)` is configured in `src/restaurant_app.py`
@@ -148,14 +148,14 @@ python3 -m http.server 8080
 
 ## URLs
 
-- **Railway Backend**: https://zomato1-production.up.railway.app
+- **Render Backend**: https://<YOUR-RENDER-APP-NAME>.onrender.com
 - **Vercel Frontend**: (Add your Vercel URL here after deployment)
 - **GitHub Repository**: https://github.com/vishalkatariax/Zomato_1
 
 ## Monitoring
 
-### Railway
-- Check deployment logs in Railway dashboard
+### Render
+- Check deployment logs in Render dashboard
 - Monitor resource usage in Metrics tab
 - View environment variables in Variables tab
 
@@ -168,19 +168,19 @@ python3 -m http.server 8080
 
 1. **Never commit `.env` file** - It contains sensitive API keys
 2. **Use environment variables** - All secrets should be in platform variables
-3. **HTTPS only** - Both Railway and Vercel provide HTTPS by default
-4. **API Key protection** - GROQ_API_KEY is only stored in Railway, never exposed to frontend
+3. **HTTPS only** - Both Render and Vercel provide HTTPS by default
+4. **API Key protection** - GROQ_API_KEY is only stored in Render, never exposed to frontend
 
 ## Cost
 
-- **Railway**: Free tier ($5 credit/month) - sufficient for this project
+- **Render**: Free tier ($5 credit/month) - sufficient for this project
 - **Vercel**: Free tier (100GB bandwidth/month) - sufficient for static frontend
 - **Groq API**: Free tier available - check current limits at console.groq.com
 
 ## Support
 
 For issues or questions:
-- Check Railway logs for backend issues
+- Check Render logs for backend issues
 - Check Vercel logs for frontend issues
 - Review this deployment guide
 - Check the main README.md for project details

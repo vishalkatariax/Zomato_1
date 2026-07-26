@@ -22,7 +22,7 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 def get_groq_client():
     if not GROQ_API_KEY:
-        raise ValueError("GROQ_API_KEY environment variable is missing. Please configure it in Railway.")
+        raise ValueError("GROQ_API_KEY environment variable is missing. Please configure it in Render.")
     return Groq(api_key=GROQ_API_KEY)
 
 # Load dataset once at startup
